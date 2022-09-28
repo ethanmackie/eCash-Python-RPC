@@ -9,7 +9,7 @@ from typing_extensions import Literal
 from ._exceptions import ImproperlyConfigured, RPCError
 from ._types import (
     BestBlockHash,
-    BitcoinRPCResponse,
+    ECashRPCResponse,
     Block,
     BlockchainInfo,
     BlockCount,
@@ -31,11 +31,11 @@ from ._types import (
 _next_rpc_id = itertools.count(1).__next__
 
 
-class BitcoinRPC:
+class ECashRPC:
     __slots__ = ("_url", "_client")
     """
     For list of all available commands, visit:
-    https://developer.bitcoin.org/reference/rpc/index.html
+    https://www.bitcoinabc.org/doc/
     """
 
     def __init__(
@@ -48,7 +48,7 @@ class BitcoinRPC:
         self._url = url
         self._client = self._configure_client(rpc_user, rpc_password, **options)
 
-    async def __aenter__(self) -> "BitcoinRPC":
+    async def __aenter__(self) -> "ECashRPC":
         return self
 
     async def __aexit__(
@@ -101,7 +101,7 @@ class BitcoinRPC:
         method: str,
         params: List[Union[str, int, List[str], None]],
         **kwargs: Any,
-    ) -> BitcoinRPCResponse:
+    ) -> ECashRPCResponse:
         """
         Pass keyword arguments to directly modify the constructed request -
             see `httpx.Request`.
@@ -125,50 +125,131 @@ class BitcoinRPC:
         else:
             return resp["result"]
 
+    # *** Avalanche Post-Consensus RPC methods ***
+    
+    async def addavalanchenode(
+            self,
+            nodeid: int, 
+            publickey: str, 
+            proof: str, 
+            delegation: str=None
+        ):
+        return await self.acall("addavalanchenode", [nodeid, publickey, proof, delegation])
+
+    async def buildavalancheproof(
+            self, 
+            sequence: int, 
+            expiration: int, 
+            master: str, 
+            stakes: []
+        ):
+        return await self.acall("addavalanchenode", [sequence, expiration, master, stakes])
+
+    async def decodeavalanchedelegation(
+            self, 
+            delegation: str
+        ):
+        return await self.acall("decodeavalanchedelegation", [delegation])
+
+    async def decodeavalancheproof(
+            self, 
+            proof: str
+        ):
+        return await self.acall("decodeavalancheproof", [proof])
+
+    async def delegateavalancheproof(
+            self, 
+            limitedproofid: str, 
+            privatekey: str, 
+            publickey: str, 
+            delegation: str=None
+        ):
+        return await self.acall("delegateavalancheproof", [limitedproofid, privatekey, publickey, delegation])
+
+    async def getavalancheinfo(self):
+        return await self.acall("getavalancheinfo", [])
+    
+    async def getavalanchekey(self):
+        return await self.acall("getavalanchekey", [])
+
+    async def getavalanchepeerinfo(self):
+        return await self.acall("getavalanchepeerinfo", [])
+    
+    async def getrawavalancheproof(
+            self, 
+            proofid: str
+        ):
+        return await self.acall("getrawavalancheproof", [proofid])
+    
+    async def isfinalblock(
+            self, 
+            blockhash: str
+        ):
+        return await self.acall("isfinalblock", [blockhash])
+    
+    async def isfinaltransaction(
+            self, 
+            txid: str,
+            blockhash: str=None
+        ):
+        return await self.acall("isfinaltransaction", [txid, blockhash])    
+
+    async def sendavalancheproof(
+            self, 
+            proof: str
+        ):
+        return await self.acall("sendavalancheproof", [proof])    
+            
+    async def verifyavalanchedelegation(
+            self, 
+            delegation: str
+        ):
+        return await self.acall("verifyavalanchedelegation", [delegation])   
+
+    async def verifyavalancheproof(
+            self, 
+            proof: str
+        ):
+        return await self.acall("verifyavalancheproof", [proof])
+                                        
+    # *** standard Bitcoin ABC RPC methods ***
+    
     async def getmempoolinfo(self) -> MempoolInfo:
-        """https://developer.bitcoin.org/reference/rpc/getmempoolinfo.html"""
         return await self.acall("getmempoolinfo", [])
 
+    async def getrawmempool(self):
+        return await self.acall("getrawmempool", [])
+
     async def getmininginfo(self) -> MiningInfo:
-        """https://developer.bitcoin.org/reference/rpc/getmininginfo.html"""
         return await self.acall("getmininginfo", [])
 
     async def getnetworkinfo(self) -> NetworkInfo:
-        """https://developer.bitcoin.org/reference/rpc/getnetworkinfo.html"""
         return await self.acall("getnetworkinfo", [])
 
     async def getblockchaininfo(self) -> BlockchainInfo:
-        """https://developer.bitcoin.org/reference/rpc/getblockchaininfo.html"""
         return await self.acall("getblockchaininfo", [])
 
     async def getconnectioncount(self) -> ConnectionCount:
-        """https://developer.bitcoin.org/reference/rpc/getconnectioncount.html"""
         return await self.acall("getconnectioncount", [])
 
     async def getchaintips(self) -> ChainTips:
-        """https://developer.bitcoin.org/reference/rpc/getchaintips.html"""
         return await self.acall("getchaintips", [])
 
     async def getdifficulty(self) -> Difficulty:
-        """https://developer.bitcoin.org/reference/rpc/getdifficulty.html"""
         return await self.acall("getdifficulty", [])
 
     async def getbestblockhash(self) -> BestBlockHash:
-        """https://developer.bitcoin.org/reference/rpc/getbestblockhash.html"""
         return await self.acall("getbestblockhash", [])
 
     async def getblockhash(self, height: int) -> BlockHash:
-        """https://developer.bitcoin.org/reference/rpc/getblockhash.html"""
         return await self.acall("getblockhash", [height])
 
     async def getblockcount(self) -> BlockCount:
-        """https://developer.bitcoin.org/reference/rpc/getblockcount.html"""
         return await self.acall("getblockcount", [])
 
     async def getblockheader(
         self, block_hash: str, verbose: bool = True
     ) -> BlockHeader:
-        """https://developer.bitcoin.org/reference/rpc/getblockheader.html"""
         return await self.acall("getblockheader", [block_hash, verbose])
 
     async def getblockstats(
@@ -178,8 +259,6 @@ class BitcoinRPC:
         timeout: Optional[float] = 5.0,
     ) -> BlockStats:
         """
-        https://developer.bitcoin.org/reference/rpc/getblockstats.html
-
         Enter `keys` as positional arguments to return only the provided `keys`
             in the response.
         """
@@ -196,8 +275,6 @@ class BitcoinRPC:
         timeout: Optional[float] = 5.0,
     ) -> Block:
         """
-        https://developer.bitcoin.org/reference/rpc/getblock.html
-
         :param verbosity: 0 for hex-encoded block data, 1 for block data with
             transactions list, 2 for block data with each transaction.
         """
@@ -213,8 +290,6 @@ class BitcoinRPC:
         timeout: Optional[float] = 5.0,
     ) -> RawTransaction:
         """
-        https://developer.bitcoin.org/reference/rpc/getrawtransactiono.html
-
         :param txid: If transaction is not in mempool, block_hash must also be provided.
         :param verbose: True for JSON, False for hex-encoded string
         :param block_hash: see ^txid
@@ -233,8 +308,6 @@ class BitcoinRPC:
         timeout: Optional[float] = 5.0,
     ) -> NetworkHashps:
         """
-        https://developer.bitcoin.org/reference/rpc/getnetworkhashps.html
-
         :param nblocks: -1 for estimated hash power since last difficulty change,
             otherwise as an average over last provided number of blocks
         :param height: If not provided, get estimated hash power for the latest block

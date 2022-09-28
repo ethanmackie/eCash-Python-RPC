@@ -1,10 +1,10 @@
 from .__version__ import __version__
 from ._exceptions import ImproperlyConfigured, RPCError
-from .bitcoin_rpc import BitcoinRPC
+from .ecash_rpc import ECashRPC
 
 __all__ = (
     "__version__",
-    "BitcoinRPC",
+    "ECashRPC",
     "ImproperlyConfigured",
     "RPCError",
 )

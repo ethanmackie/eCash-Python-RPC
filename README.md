@@ -1,20 +1,93 @@
-# bitcoin-python-async-rpc
-Lightweight Bitcoin async JSON-RPC Python client.
+# ecash-python-rpc
+eCash JSON-RPC Python module.
 
-Serves as a tiny layer between an application and a Bitcoin daemon, its primary usage
-is querying the current state of Bitcoin blockchain, network stats, transactions...
+Serves as a tiny layer between an application and an eCash node daemon, its primary usage
+is querying the current state of the eCash blockchain, network stats, transactions...
 
-If you want complete Bitcoin experience in Python, consult
-[python-bitcoinlib](https://github.com/petertodd/python-bitcoinlib).
+Compatible with **Avalanche Post-Consensus** (0.26.x and later).
+
 
 ## Installation
+
+#### 1. Install from pip3
 ```bash
-$ pip install bitcoinrpc
+$ pip3 install ecashrpc
+```
+
+#### 2. Node configuration
+Configure your eCash Avalanche Node for remote RPC calls based on your node's security needs. This includes:
+- adding `server=1`, `rpcallowip=`, `rpcbind=` and `rpcauth/rpcuser/rpcpassword=` parameters to your node configuration in bitcoin.conf. (refer to the **Server Configuration section** of [this Blockchain Dev guide](https://www.buildblockchain.tech/blog/btc-node-developers-guide))
+- a reverse proxy server such as [nginx](http://nginx.org/) to serve RPC data to external web apps subject to your eCash node's rpcallowip whitelist
+- install a digital certificate (e.g. [Let's Encrypt](https://letsencrypt.org)) on your node to enable HTTPS if desired
+
+
+## Usage
+
+Create a sample `ecashrpctest.py` script as follows:
+```
+import asyncio
+from ecashrpc import ECashRPC
+
+async def main():
+    async with ECashRPC('HOST:PORT','RPCUSER','RPCPASSWORD') as xecNode:
+        print(await xecNode.getavalancheinfo())
+
+if __name__ == "__main__":
+    asyncio.run(main())
+```
+
+Running this script (with some additional formatting) yields:
+```
+$ python3 ecashrpctest.py
+
+{
+  "ready_to_poll":true,
+  "local":{
+     "verified":true,
+     "proofid":"...",
+     "limited_proofid":"...",
+     "master":"...",
+     "payout_address":"ecash:qqmd..........",
+     "stake_amount":1560000000
+  },
+  "network":{
+     "proof_count":18,
+     "connected_proof_count":18,
+     "dangling_proof_count":0,
+     "finalized_proof_count":18,
+     "conflicting_proof_count":0,
+     "immature_proof_count":4,
+     "total_stake_amount":83681202831.85,
+     "connected_stake_amount":83681202831.85,
+     "dangling_stake_amount":0,
+     "node_count":37,
+     "connected_node_count":33,
+     "pending_node_count":4
+  }
+ }
 ```
 
 ## Supported methods
-Here is a list of supported methods, divided by their categories. Should you need
-method not implemented, wrap the call in `BitcoinRPC.acall(<your_method>, ...)` coroutine.
+Here is a list of supported methods. Please submit a PR if you'd like to have a specific RPC method added.
+
+### Avalanche
+
+|   Method   |   Supported?     |
+|------------|:----------------:|
+| `addavalanchenode` | ✔ |
+| `buildavalancheproof` | ✔ |
+| `decodeavalanchedelegation` | ✔ |
+| `decodeavalancheproof` | ✔ |
+| `delegateavalancheproof` | ✔ |
+| `getavalancheinfo` | ✔ |
+| `getavalanchekey` | ✔ |
+| `getavalanchepeerinfo` | ✔ |
+| `getrawavalancheproof` | ✔ |
+| `isfinalblock` | ✔ |
+| `isfinaltransaction` | ✔ |
+| `sendavalancheproof` | ✔ |
+| `verifyavalanchedelegation` | ✔ |
+| `verifyavalancheproof` | ✔ |
 
 ### Blockchain
 
@@ -30,6 +103,7 @@ method not implemented, wrap the call in `BitcoinRPC.acall(<your_method>, ...)` 
 | `getchaintips` | ✔ |
 | `getdifficulty` | ✔ |
 | `getmempoolinfo` | ✔ |
+| `getrawmempool` | ✔ |
 | `getnetworkhashps` | ✔ |
 
 ### Mining
@@ -51,48 +125,6 @@ method not implemented, wrap the call in `BitcoinRPC.acall(<your_method>, ...)` 
 |------------|:----------------:|
 | `getrawtransaction` | ✔ |
 
-## Usage
-Minimal illustration (assuming Python 3.8+, where you can run `async` code in console)
-
-```
-$ python -m asyncio
->>> import asyncio
->>>
->>> from bitcoinrpc import BitcoinRPC
->>> rpc = BitcoinRPC("http://localhost:18443" "rpc_user", "rpc_passwd")
->>> await rpc.getconnectioncount()
-10
->>> await rpc.aclose()  # Clean-up resource
-```
-
-You can also use the `BitcoinRPC` as an asynchronous context manager, which does
-all the resource clean-up automatically, as the following example shows:
-
-```
-$ cat btc_rpc_minimal.py
-import asyncio
-
-from bitcoinrpc import BitcoinRPC
-
-
-async def main():
-    async with BitcoinRPC("http://localhost:18443", "rpc_user", "rpc_password") as rpc:
-        print(await rpc.getconnectioncount())
-
-
-if __name__ == "__main__":
-    asyncio.run(main())
-```
-
-Running this script yields:
-```
-$ python btc_rpc_minimal.py
-10
-```
-
-## Changelog
-
-- **2021/12/28 - 0.5.0** change the signature of `BitcoinRPC` from `host, port, ...` to `url, ...`, delegating the creation of the node url to the caller.
 
 
 ## License

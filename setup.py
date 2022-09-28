@@ -35,13 +35,13 @@ def get_long_description(readme_file: str) -> str:
 
 
 setup(
-    name="bitcoinrpc",
+    name="ecashrpc",
     python_requires=">=3.7",
-    version=get_version("bitcoinrpc"),
-    description="Lightweight Bitcoin JSON-RPC Python asynchronous client",
+    version=get_version("ecashrpc"),
+    description="eCash JSON-RPC Python module",
     long_description=get_long_description("README.md"),
     long_description_content_type="text/markdown",
-    keywords="bitcoin async json-rpc",
+    keywords="eCash XEC bitcoin ABC async json-rpc avalanche post-consensus",
     license="MIT",
     classifiers=[
         "Development Status :: 4 - Beta",
@@ -54,10 +54,10 @@ setup(
         "Programming Language :: Python :: 3 :: Only",
         "Topic :: Software Development :: Libraries :: Python Modules",
     ],
-    url="https://github.com/bibajz/bitcoin-python-async-rpc",
-    author="Libor Martinek",
-    author_email="libasmartinek@protonmail.com",
+    url="https://github.com/ethanmackie/eCash-Python-RPC",
+    author="Ethan Quintera",
+    author_email="ethanmackie1199@gmail.com",
     package_dir={"": "src"},
-    packages=["bitcoinrpc"],
+    packages=["ecashrpc"],
     install_requires=get_requirements("requirements.txt"),
 )
